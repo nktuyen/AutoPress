@@ -100,9 +100,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="AutoPress.h" />
     <ClInclude Include="AutoPressDlg.h" />
     <ClInclude Include="KbdEventStruct.h" />

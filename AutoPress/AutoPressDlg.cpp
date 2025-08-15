@@ -252,6 +252,7 @@ LRESULT CAutoPressDlg::OnKeyPlayingMessage(WPARAM wParam, LPARAM lParam)
 			m_sttPlayingStatus.ShowWindow(SW_HIDE);
 
 		m_btnRecord.EnableWindow(TRUE);
+		m_btnClear.EnableWindow(TRUE);
 		m_btnPlay.SetWindowText(_T("&Play"));
 
 		int nState = IsDlgButtonChecked(IDC_CHK_HIDE_WHEN_PLAY);
@@ -327,7 +328,7 @@ void CAutoPressDlg::OnBnClickedBtnClear()
 
 void CAutoPressDlg::OnBnClickedBtnRecord()
 {
-	if(!m_bRecording) //Not recording
+	if(!m_bRecording) //Not recording -> Record
 	{
 		m_hKbdHook = ::SetWindowsHookEx(WH_KEYBOARD, &CAutoPressDlg::KeyboardProc, AfxGetInstanceHandle(), ::GetCurrentThreadId());
 		if(m_hKbdHook != NULL)
@@ -336,9 +337,11 @@ void CAutoPressDlg::OnBnClickedBtnRecord()
 			m_dwLastTickCount = GetTickCount();
 			m_bRecording = TRUE;
 			m_btnRecord.SetWindowText(_T("&Stop"));
+			m_btnClear.EnableWindow(FALSE);
+			m_btnPlay.EnableWindow(FALSE);
 		}
 	}
-	else //Recording
+	else //Recording -> Stop
 	{
 		if(m_hKbdHook != NULL)
 		{
@@ -347,6 +350,7 @@ void CAutoPressDlg::OnBnClickedBtnRecord()
 		}
 		m_bRecording = FALSE;
 		m_btnRecord.SetWindowText(_T("&Record"));
+		m_btnClear.EnableWindow(TRUE);
 		m_btnPlay.EnableWindow(m_lstKeys.GetCount() > 0);
 	}
 }
@@ -364,6 +368,7 @@ void CAutoPressDlg::OnBnClickedBtnPlay()
 		delete m_pPlayThread;
 		m_pPlayThread = NULL;
 		m_btnRecord.EnableWindow(TRUE);
+		m_btnClear.EnableWindow(TRUE);
 		m_btnPlay.SetWindowText(_T("&Play"));
 	}
 	else //Not Playing -> Play
@@ -387,6 +392,7 @@ void CAutoPressDlg::OnBnClickedBtnPlay()
 			if(m_pPlayThread->CreateThread(CREATE_SUSPENDED, 0, NULL))
 			{
 				m_btnRecord.EnableWindow(FALSE);
+				m_btnClear.EnableWindow(FALSE);
 				m_btnPlay.SetWindowText(_T("&Stop"));
 				m_sttPlayingStatus.ShowWindow(SW_HIDE);
 
