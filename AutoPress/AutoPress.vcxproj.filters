@@ -39,6 +39,12 @@
     <ClInclude Include="KeyCodeMaper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DlgWindowSelection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowInfoStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AutoPress.cpp">
@@ -54,6 +60,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyCodeMaper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgWindowSelection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

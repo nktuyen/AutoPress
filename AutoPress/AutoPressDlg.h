@@ -32,6 +32,7 @@ protected:
 	DWORD m_dwLastTickCount;
 	HHOOK m_hKbdHook;
 	CFont m_fontStatus;
+	CFont m_fontBold;
 	static CAutoPressDlg* m_pInstance;
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
@@ -57,4 +58,6 @@ public:
 	CEdit m_edtRepeatTimes;
 	CSpinButtonCtrl m_spinRepeatTimes;
 	afx_msg void OnEnChangeEdtRepeatTimes();
+	CButton m_btnAssignAppl;
+	afx_msg void OnBnClickedBtnAssignProcess();
 };

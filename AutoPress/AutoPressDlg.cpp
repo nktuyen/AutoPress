@@ -9,6 +9,7 @@
 #include "KbdEventStruct.h"
 #include "KeyCodeMaper.h"
 #include "KeysPlayThread.h"
+#include "DlgWindowSelection.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -127,6 +128,7 @@ void CAutoPressDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STT_PLAYING_STATUS, m_sttPlayingStatus);
 	DDX_Control(pDX, IDC_EDT_REPEAT_TIMES, m_edtRepeatTimes);
 	DDX_Control(pDX, IDC_SPIN_REPEAT_TIMES, m_spinRepeatTimes);
+	DDX_Control(pDX, IDC_BTN_ASSIGN_PROCESS, m_btnAssignAppl);
 }
 
 BEGIN_MESSAGE_MAP(CAutoPressDlg, CDialogEx)
@@ -140,6 +142,7 @@ BEGIN_MESSAGE_MAP(CAutoPressDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHK_ALWAYS_ON_TOP, &CAutoPressDlg::OnBnClickedChkAlwaysOnTop)
 	ON_REGISTERED_MESSAGE(CAutoPressDlg::m_nCommunicationMessageId, &CAutoPressDlg::OnKeyPlayingMessage)
 	ON_EN_CHANGE(IDC_EDT_REPEAT_TIMES, &CAutoPressDlg::OnEnChangeEdtRepeatTimes)
+	ON_BN_CLICKED(IDC_BTN_ASSIGN_PROCESS, &CAutoPressDlg::OnBnClickedBtnAssignProcess)
 END_MESSAGE_MAP()
 
 
@@ -177,6 +180,12 @@ BOOL CAutoPressDlg::OnInitDialog()
 	LOGFONT lf={0};
 	GetFont()->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
+	m_fontBold.CreateFontIndirect(&lf);
+	m_btnAssignAppl.SetFont(&m_fontBold);
+	m_btnRecord.SetFont(&m_fontBold);
+	m_btnPlay.SetFont(&m_fontBold);
+	m_btnClear.SetFont(&m_fontBold);
+	GetDlgItem(IDC_STT_REPETITION)->SetFont(&m_fontBold);
 	lf.lfHeight = 24;
 	m_fontStatus.CreateFontIndirect(&lf);
 	m_sttPlayingStatus.SetFont(&m_fontStatus);
@@ -206,6 +215,12 @@ void CAutoPressDlg::OnDestroy()
 		if(m_pPlayThread->IsRunning())
 			m_pPlayThread->Stop();
 		delete m_pPlayThread;
+	}
+
+	if(m_hKbdHook != NULL)
+	{
+		::UnhookWindowsHookEx(m_hKbdHook);
+		m_hKbdHook = NULL;
 	}
 
 	CDialogEx::OnDestroy();
@@ -253,6 +268,7 @@ LRESULT CAutoPressDlg::OnKeyPlayingMessage(WPARAM wParam, LPARAM lParam)
 
 		m_btnRecord.EnableWindow(TRUE);
 		m_btnClear.EnableWindow(TRUE);
+		m_btnAssignAppl.EnableWindow(m_arrKeyEvents.GetCount() > 0);
 		m_btnPlay.SetWindowText(_T("&Play"));
 
 		int nState = IsDlgButtonChecked(IDC_CHK_HIDE_WHEN_PLAY);
@@ -339,6 +355,7 @@ void CAutoPressDlg::OnBnClickedBtnRecord()
 			m_btnRecord.SetWindowText(_T("&Stop"));
 			m_btnClear.EnableWindow(FALSE);
 			m_btnPlay.EnableWindow(FALSE);
+			m_btnAssignAppl.EnableWindow(FALSE);
 		}
 	}
 	else //Recording -> Stop
@@ -352,6 +369,7 @@ void CAutoPressDlg::OnBnClickedBtnRecord()
 		m_btnRecord.SetWindowText(_T("&Record"));
 		m_btnClear.EnableWindow(TRUE);
 		m_btnPlay.EnableWindow(m_lstKeys.GetCount() > 0);
+		m_btnAssignAppl.EnableWindow(m_arrKeyEvents.GetCount() > 0);
 	}
 }
 
@@ -369,6 +387,7 @@ void CAutoPressDlg::OnBnClickedBtnPlay()
 		m_pPlayThread = NULL;
 		m_btnRecord.EnableWindow(TRUE);
 		m_btnClear.EnableWindow(TRUE);
+		m_btnAssignAppl.EnableWindow(m_arrKeyEvents.GetCount() > 0);
 		m_btnPlay.SetWindowText(_T("&Play"));
 	}
 	else //Not Playing -> Play
@@ -393,6 +412,7 @@ void CAutoPressDlg::OnBnClickedBtnPlay()
 			{
 				m_btnRecord.EnableWindow(FALSE);
 				m_btnClear.EnableWindow(FALSE);
+				m_btnAssignAppl.EnableWindow(FALSE);
 				m_btnPlay.SetWindowText(_T("&Stop"));
 				m_sttPlayingStatus.ShowWindow(SW_HIDE);
 
@@ -425,4 +445,23 @@ void CAutoPressDlg::OnEnChangeEdtRepeatTimes()
 	CheckDlgButton(IDC_RADIO_REPEAT_NUMBER, BST_CHECKED);
 	CheckDlgButton(IDC_RADIO_REPEAT_NONE, BST_UNCHECKED);
 	CheckDlgButton(IDC_RADIO_REPEAT_INFINITE, BST_UNCHECKED);
+}
+
+
+void CAutoPressDlg::OnBnClickedBtnAssignProcess()
+{
+	CDlgWindowSelection dlgWindowSelect(this);
+	if(dlgWindowSelect.DoModal() != IDOK)
+		return;
+	WindowInfo wndIndo = {0};
+	if(dlgWindowSelect.GetSelectedWindowInfo(&wndIndo) != LB_ERR)
+	{
+		KeyBdEvent* kbdEvent = nullptr;
+		for(INT_PTR i=0;i<m_arrKeyEvents.GetCount();i++)
+		{
+			kbdEvent = (KeyBdEvent*)m_arrKeyEvents.GetAt(i);
+			if(nullptr != kbdEvent)
+				kbdEvent->hWnd = wndIndo.hWnd;
+		}
+	}
 }

@@ -79,6 +79,20 @@ int CKeysPlayThread::Run()
 						dwFlag |= KEYEVENTF_KEYUP;
 					if(kbdEvent->DelayTime != 0)
 						Sleep(kbdEvent->DelayTime);
+
+					if(kbdEvent->hWnd != NULL)
+					{
+						if(::IsWindow(kbdEvent->hWnd))
+						{
+							if(::GetForegroundWindow() != kbdEvent->hWnd)
+								::SetForegroundWindow(kbdEvent->hWnd);
+						}
+						else {
+							SetRunning(FALSE);
+							break;
+						}
+					}
+
 					if(m_pWnd != NULL && m_nCommnMessageId != 0)
 						m_pWnd->PostMessage(m_nCommnMessageId, KBD_PLAY_EVENT_PLAYING, (LPARAM)kbdEvent);
 					keybd_event(kbdEvent->VirtualKeyCode, kbdEvent->VirtualScanCode, dwFlag, 0);
